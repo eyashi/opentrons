@@ -29,7 +29,7 @@ import {
   TemperatureForm,
 } from './forms'
 import FormAlerts from './FormAlerts'
-import ButtonRow from './ButtonRow'
+import { ButtonRow } from './ButtonRow'
 
 const STEP_FORM_MAP: { [StepType]: * } = {
   mix: MixForm,
