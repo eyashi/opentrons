@@ -45,6 +45,13 @@ export function getNextRobotStateAndWarningsSingleCommand(
     case 'delay':
       // these commands don't have any effects on the state
       return { robotState: prevRobotState, warnings: [] }
+    case 'temperatureModule/setTargetTemperature':
+    case 'temperatureModule/deactivate':
+    case 'thermocycler/setTargetTemperature':
+    case 'thermocycler/deactivate':
+      console.warn(`NOT IMPLEMENTED: ${command.command}`)
+      return { robotState: prevRobotState, warnings: [] }
+
     default:
       assert(
         false,
