@@ -1,6 +1,10 @@
 // @flow
 import cloneDeep from 'lodash/cloneDeep'
-import { makeContext, getInitialRobotStateStandard } from './fixtures'
+import {
+  makeContext,
+  getRobotStateAndWarningsStandard,
+  createDraftStateFixture,
+} from './fixtures'
 import {
   forEngageMagnet,
   forDisengageMagnet,
@@ -8,8 +12,8 @@ import {
 
 const moduleId = 'magneticModuleId'
 let invariantContext
-let disengagedRobotState
-let engagedRobotState
+let disengagedRobotStateAndWarnings
+let engagedRobotStateAndWarnings
 
 beforeEach(() => {
   invariantContext = makeContext()
@@ -18,13 +22,15 @@ beforeEach(() => {
     type: 'magdeck',
     model: 'GEN1',
   }
-  disengagedRobotState = getInitialRobotStateStandard(invariantContext)
-  disengagedRobotState.modules[moduleId] = {
+  disengagedRobotStateAndWarnings = getRobotStateAndWarningsStandard(
+    invariantContext
+  )
+  disengagedRobotStateAndWarnings.robotState.modules[moduleId] = {
     slot: '4',
     moduleState: { type: 'magdeck', engaged: false },
   }
-  engagedRobotState = cloneDeep(disengagedRobotState)
-  engagedRobotState.modules[moduleId].moduleState = {
+  engagedRobotStateAndWarnings = cloneDeep(disengagedRobotStateAndWarnings)
+  engagedRobotStateAndWarnings.robotState.modules[moduleId].moduleState = {
     type: 'magdeck',
     engaged: true,
   }
@@ -32,40 +38,56 @@ beforeEach(() => {
 
 describe('forEngageMagnet', () => {
   test('engages magnetic module when it was unengaged', () => {
-    const result = forEngageMagnet(
-      { module: moduleId, engageHeight: 10 },
+    const params = { module: moduleId, engageHeight: 10 }
+
+    const result = createDraftStateFixture(
+      disengagedRobotStateAndWarnings,
+      params,
       invariantContext,
-      disengagedRobotState
+      forEngageMagnet
     )
-    expect(result).toEqual({ warnings: [], robotState: engagedRobotState })
+
+    expect(result).toEqual(engagedRobotStateAndWarnings)
   })
 
   test('no effect on magnetic module "engaged" state when already engaged', () => {
-    const result = forEngageMagnet(
-      { module: moduleId, engageHeight: 11 },
+    const params = { module: moduleId, engageHeight: 11 }
+
+    const result = createDraftStateFixture(
+      engagedRobotStateAndWarnings,
+      params,
       invariantContext,
-      engagedRobotState
+      forEngageMagnet
     )
-    expect(result).toEqual({ warnings: [], robotState: engagedRobotState })
+
+    expect(result).toEqual(engagedRobotStateAndWarnings)
   })
 })
 
 describe('forDisengageMagnet', () => {
   test('unengages magnetic module when it was engaged', () => {
-    const result = forDisengageMagnet(
-      { module: moduleId },
+    const params = { module: moduleId }
+
+    const result = createDraftStateFixture(
+      engagedRobotStateAndWarnings,
+      params,
       invariantContext,
-      engagedRobotState
+      forDisengageMagnet
     )
-    expect(result).toEqual({ warnings: [], robotState: disengagedRobotState })
+
+    expect(result).toEqual(disengagedRobotStateAndWarnings)
   })
 
   test('no effect on magnetic module "engaged" state when already disengaged', () => {
-    const result = forDisengageMagnet(
-      { module: moduleId },
+    const params = { module: moduleId }
+
+    const result = createDraftStateFixture(
+      disengagedRobotStateAndWarnings,
+      params,
       invariantContext,
-      disengagedRobotState
+      forDisengageMagnet
     )
-    expect(result).toEqual({ warnings: [], robotState: disengagedRobotState })
+
+    expect(result).toEqual(disengagedRobotStateAndWarnings)
   })
 })

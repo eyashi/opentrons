@@ -1,10 +1,11 @@
 // @flow
 import merge from 'lodash/merge'
 import {
-  getInitialRobotStateStandard,
+  getRobotStateAndWarningsStandard,
   makeContext,
   getTipColumn,
   DEFAULT_PIPETTE,
+  createDraftStateFixture,
 } from './fixtures'
 import { forPickUpTip } from '../getNextRobotStateAndWarnings/forPickUpTip'
 
@@ -20,7 +21,7 @@ let initialRobotState
 
 beforeEach(() => {
   invariantContext = makeContext()
-  initialRobotState = getInitialRobotStateStandard(invariantContext)
+  initialRobotState = getRobotStateAndWarningsStandard(invariantContext)
 
   // $FlowFixMe: mock methods
   dispenseUpdateLiquidState.mockClear()
@@ -32,11 +33,16 @@ describe('tip tracking', () => {
   test('single-channel', () => {
     const params = { pipette: p300SingleId, labware: tiprack1Id, well: 'A1' }
 
-    const result = forPickUpTip(params, invariantContext, initialRobotState)
+    const result = createDraftStateFixture(
+      initialRobotState,
+      params,
+      invariantContext,
+      forPickUpTip
+    )
 
     expect(result.warnings).toEqual([])
     expect(result.robotState).toEqual(
-      merge({}, initialRobotState, {
+      merge({}, initialRobotState.robotState, {
         tipState: {
           tipracks: {
             [tiprack1Id]: {
@@ -57,11 +63,16 @@ describe('tip tracking', () => {
       labware: 'tiprack1Id',
       well: 'A1',
     }
-    const result = forPickUpTip(params, invariantContext, initialRobotState)
+    const result = createDraftStateFixture(
+      initialRobotState,
+      params,
+      invariantContext,
+      forPickUpTip
+    )
 
     expect(result.warnings).toEqual([])
     expect(result.robotState).toEqual(
-      merge({}, initialRobotState, {
+      merge({}, initialRobotState.robotState, {
         tipState: {
           tipracks: {
             [tiprack1Id]: getTipColumn(1, false),
