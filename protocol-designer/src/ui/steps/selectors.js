@@ -86,6 +86,20 @@ const getHoveredStepLabware: Selector<Array<string>> = createSelector(
       return [stepArgs.labware]
     }
 
+    if (stepArgs.module) {
+      const isMagnetCommand =
+        stepArgs.commandCreatorFnName === 'engageMagnet' ||
+        stepArgs.commandCreatorFnName === 'disengageMagnet'
+
+      const isTemperatureCommand =
+        stepArgs.commandCreatorFnName === 'deactivateTemperature' ||
+        stepArgs.commandCreatorFnName === 'setTemperature'
+
+      if (isMagnetCommand || isTemperatureCommand) {
+        return [stepArgs.module]
+      }
+    }
+
     // step types that have no labware that gets highlighted
     if (!(stepArgs.commandCreatorFnName === 'delay')) {
       // TODO Ian 2018-05-08 use assert here
